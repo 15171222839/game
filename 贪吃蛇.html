@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    *{
+      margin:0;
+      padding:0;
+    }
+    #box{
+      width:500px;
+      height:100%;
+      margin:0 auto;
+    }
+    #bigBox{
+      width:400px;
+      height:500px;
+      border:2px solid black;
+      position:relative;
+    }
+    #smallBox{
+      margin:5px;
+      width:20px;
+      height:20px;
+      background:red;
+      position:absolute;
+    }
+  </style>
+</head>
+<body>
+  <div id="box">
+    <div id="bigBox">
+      <div id="smallBox"></div>
+    </div>
+    <button>开始游戏</button>
+  </div>
+
+  <script>
+    function randomNum(min,max){
+      return Math.floor(Math.random()*(max-min+1)+min)
+    }
+    var box = document.getElementById("box");
+    var BigBox = document.getElementById("bigBox");
+    var SmallBox = document.getElementById("smallBox");
+    var speed = 10;var direction;
+    //开始游戏
+    box.onclick = function(ev){
+      direction = 39
+    }
+    //随机位置
+    function position(){
+      var X = randomNum(0,380)
+      var Y = randomNum(0,480)
+      SmallBox.style.left = X + "px"
+      SmallBox.style.top = Y + "px"
+    }
+    position();
+    //键盘事件
+    document.onkeydown = function(e){
+      var code = e.keyCode
+      switch(code){
+        case 37 :
+        direction = 37;
+        break;
+        case 38 :
+        direction = 38;
+        break;
+        case 39 :
+        direction = 39;
+        break;
+        case 40 :
+        direction = 40;
+        break;
+      }
+    }
+    //蛇行走的定时器
+    function move(){
+      var timer = setInterval(function(){
+        if(direction == 37){
+          SmallBox.style.left = SmallBox.offsetLeft - speed + "px"
+        }else if(direction == 38){
+          SmallBox.style.top = SmallBox.offsetTop - speed + "px"
+        }else if(direction == 39){
+          SmallBox.style.left = SmallBox.offsetLeft + (speed-10)+ "px"
+        }else if(direction == 40){
+          SmallBox.style.top = SmallBox.offsetTop + (speed-10) + "px"
+        }
+        if(SmallBox.offsetLeft <= 0 || SmallBox.offsetTop <= 0 || BigBox.offsetWidth-SmallBox.offsetLeft <= SmallBox.offsetWidth || BigBox.offsetHeight-SmallBox.offsetTop <= SmallBox.offsetHeight){
+          alert("游戏结束！")
+          clearInterval(timer)
+          window.location.reload();  
+        }
+      },100) 
+    }
+    move();
+    
+  </script>
+</body>
+</html>

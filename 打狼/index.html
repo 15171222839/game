@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    .box{
+      width: 320px;
+      height: 480px;
+      margin:0 auto;
+      background: url("img/game_bg.jpg");
+      position: relative;
+    }
+    #count{
+      position: absolute;
+      font-size: 20px;
+      color: #fff;
+      top:8px;
+      left: 60px;
+    }
+    #time{
+      position: absolute;
+      width: 180px;
+      height: 16px;
+      background: url("img/progress.png");
+      left: 63px;
+      top:66px;
+    }
+    #start{
+      position: absolute;
+      width: 100px;
+      height: 30px;
+      text-align: center;
+      line-height: 30px;
+      color:#fff;
+      background: #f00;
+      font-size: 18px;
+      border-radius: 4px;
+      top:50%;
+      left: 50%;
+      margin:-15px 0 0 -50px;
+      cursor: pointer;
+      z-index: 999;
+    }
+    #pit div{
+      width: 73px;
+      height: 65px;
+      position: absolute;
+      background-size:100% 100%; 
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div id="count">0</div>
+    <div id="time"></div>
+    <div id="start">开始</div>
+    <div id="pit">
+    </div>
+  </div>
+
+  <script>
+    function $(id){
+      return document.getElementById(id);
+    }
+    function randomNum(min,max){
+      return Math.floor(Math.random() * (max-min+1) + min)
+    }
+    //设置游戏时间
+    var gameTime = 10;
+    //设置游戏得分
+    var score = 0;
+    //时间进度条
+    function bar(){
+      var speed = $("time").offsetWidth / (gameTime*5);
+      var timer = setInterval(function(){
+        if($("time").offsetWidth - speed < 0){
+          $("time").style.width = 0;
+          clearInterval(timer);
+          alert("游戏结束，你的得分是"+score);
+          //页面重新加载
+          window.location.reload();
+        }
+        $("time").style.width = $("time").offsetWidth - speed + "px";
+      },200)
+    }
+    //点击开始按钮
+    $("start").onclick = function(){
+      //开始按钮消失
+      this.style.display = "none";
+      //进度条开始移动
+      bar();
+      //出狼动画
+      setInterval(function(){
+        randomHole();
+      },1000) 
+    }
+    //设置狼坑的位置
+    var pitP = [
+          ['112px','145px'],
+          ['35px','257px'],
+          ['202px','171px'],
+          ['32px','190px'],
+          ['118px','221px'],
+          ['215px','241px'],
+          ['133px','303px'],
+          ['44px','323px'],
+          ['223px','325px']
+      ]
+    for(var i=0;i<pitP.length;i++){
+      var pit = document.createElement("div");
+      pit.style.left = pitP[i][0];
+      pit.style.top = pitP[i][1];
+      //这个坑是可以点击
+      pit.life = true;
+      $("pit").appendChild(pit)
+    }
+    //往pit里面添加9个div之后。获取div的数组，就是狼坑的数组
+    var pitArr = $("pit").getElementsByTagName("div");
+    //准备狼的动画图片组数
+    var hWolf = [];
+    var xWolf = [];
+    for(var i=0;i<10;i++){
+      hWolf.push("img/h"+i+".png");
+      xWolf.push("img/x"+i+".png");
+    }
+    //出狼动画
+    // 需要两个参数：一个是在哪个坑执行动画，另一个参数是出什么狼
+    function wolfAnimate(hole,wolf){
+      var index = 0;
+      var speed = 1;
+      hole.timer = setInterval(function(){
+        hole.style.backgroundImage = "url(" + wolf[index] + ")";
+        if(index == 5){
+          speed *= -1;
+        }
+        index = index + speed;
+        if(index < 0){
+          clearInterval(hole.timer);
+          hole.style.backgroundImage = "";
+        }
+      },300)
+    }
+    //随机坑来出随机狼
+    function randomHole(){
+      var holeIndex = randomNum(0,(pitArr.length - 1));
+      var wolfIndex = randomNum(0,1);
+      if(pitArr[holeIndex].style.backgroundImage == ""){
+        if(wolfIndex == 0){
+          wolfAnimate(pitArr[holeIndex],hWolf)
+          //给每个坑加一个属性，0是灰太狼，1是小灰灰
+          pitArr[holeIndex].type = 0
+        }else{
+          wolfAnimate(pitArr[holeIndex],xWolf)
+          pitArr[holeIndex].type = 1
+          
+        }
+      }
+    }
+    //给每个坑绑定一个点击事件
+    for(var i=0; i<pitArr.length;i++){
+      pitArr[i].onclick = function(){
+          //点击之后要执行打狼动画
+          // 点击哪个坑，那个坑来执行打狼动画，还要判断这个坑里面是什么狼？
+          if(this.style.backgroundImage != ""){
+            if(this.type == 0){
+              hitWolf(this,hWolf)
+            }else{
+              hitWolf(this,xWolf)
+            }
+          }        
+      }
+    }
+    //打狼动画
+    function hitWolf(hole,wolf){
+      clearInterval(hole.timer);
+      var index = 6;
+      if(hole.life != true){
+        return false;
+      }
+      hole.life = false;
+      if(hole.type == 0){
+        score += 10
+      }else{
+        score -= 10
+      }
+      $("count").innerHTML = score;
+      hole.t = setInterval(function(){
+        hole.style.backgroundImage = "url(" + wolf[index] + ")";
+        index ++;
+        if(index == 9){
+          hole.style.backgroundImage = "";
+          clearInterval(hole.t);
+          hole.life = true;
+        }
+      },200)
+    }
+  </script>
+</body>
+</html>

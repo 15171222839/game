@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    #box{
+      width:600px;
+      height:600px;
+      background:black;
+      position:relative;
+      margin:0 auto;
+      border:2px solid yellowgreen;
+    }
+    #tank{
+      width:32px;
+      height:32px;
+      background: url(tankAll.gif) 0 0 no-repeat;
+      position:absolute;
+      bottom:0;
+      display:none;
+      left:220px;
+    }
+    .tank1,.tank2,.tank3,.zhadan{
+      width:32px;
+      height:32px;  
+      position:absolute;
+      bottom:20px;
+      left:100px;
+      top:0;
+      display:block;
+    }
+    .tank1{
+      background: url(tankAll.gif) -224px 0 no-repeat;
+    }
+    .tank2{
+      background: url(tankAll.gif) -224px -32px no-repeat;
+    }
+    .tank3{
+      background: url(tankAll.gif) -288px -64px no-repeat;
+    }
+    .zhadan{
+      background: url(tankAll.gif) -345px -109px no-repeat;
+    }
+    button{
+      width:80px;
+      height:28px;
+      left:50%;
+      top:50%;
+      margin-left:-40px;
+      position: absolute;
+      background:orange;
+      display: block;
+    }
+    .bullet{
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: white;
+      position: absolute;
+    }
+    #town{
+      width:64px;
+      height:48px;
+      position:absolute;
+      left:268px;
+      bottom: 0;
+    }
+    #towmImg{
+      width:32px;
+      height:32px;
+      position: absolute;
+      background:url(tankAll.gif) -256px 0 no-repeat;
+      left:16px;
+      top:16px;
+    }
+    #townWallT{
+      width:100%;
+      height:16px;
+      position:absolute;
+    }
+    #townWall0,#townWall1,#townWall2,#townWall3{
+      width:16px;
+      height:16px;
+      position:absolute;
+      background:url(tankAll.gif) 0 -96px no-repeat;
+    }
+    #townWallT>#townWall1{
+      left:16px;
+    }
+    #townWallT>#townWall2{
+      left:32px;
+    }
+    #townWallT>#townWall3{
+      left:48px;
+    }
+    #townWallL,#townWallR{
+      width:16px;
+      height:100%;
+      position: absolute;
+    }
+    #townWallL>#townWall0,#townWallR>#townWall0{
+      top:16px;
+    }
+    #townWallL>#townWall1,#townWallR>#townWall1{
+      top:32px;
+    }
+    #townWallR{
+      left:48px;
+    }
+  </style>
+</head>
+<body>
+  <div id="box">
+    <div id="tank"></div>
+    <button id="btn">开始游戏</button>
+    <!-- 城墙 -->
+    <div id="town">
+      <div id="towmImg"></div>
+      <div id="townWallT">
+        <div id="townWall0"></div>
+        <div id="townWall1"></div>
+        <div id="townWall2"></div>
+        <div id="townWall3"></div>
+      </div>
+      <div id="townWallL">
+        <div id="townWall0"></div>
+        <div id="townWall1"></div>
+      </div>
+      <div id="townWallR">
+        <div id="townWall0"></div>
+        <div id="townWall1"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var direction;
+    var speed = 10;
+    var sp = 5;spe = 9;spee = 3 //坦克速度
+    var num = 0;numm = 0; //打到坦克身上的子弹
+    var number = 0; //坦克数量
+    function $(id){
+      return document.getElementById(id)
+    }
+    function randomNum(min,max){
+      return Math.floor(Math.random()*(max-min+1)+min)
+    }
+    $("btn").onclick = function(){
+      $("btn").style.display = "none"
+      $("tank").style.display = "block"
+    }
+    //键盘事件
+    document.onkeydown = function(e){
+      var code = e.keyCode
+      //坦克不能穿过城堡碰撞条件
+      var WallTD = $("tank").offsetTop >= ($("town").offsetTop - $("tank").offsetWidth) && $("tank").offsetLeft >= ($("town").offsetLeft - $("tank").offsetWidth) && $("tank").offsetLeft <= ($("town").offsetLeft + $("town").offsetWidth);
+      // var direction = "top"
+      if(code == 32){
+        bullet1(direction);
+      }
+      switch(code){
+        case 37 :
+        direction = 37;
+        $("tank").style.background = "url(tankAll.gif) -64px 0 no-repeat"
+        if(WallTD){
+          $("tank").style.left = $("tank").offsetLeft + "px"
+        }else{
+          $("tank").style.left = $("tank").offsetLeft - speed + "px"
+        }   
+        break;
+        case 38 :
+        direction = 38;
+        $("tank").style.background = "url(tankAll.gif) 0 0 no-repeat"
+        $("tank").style.top = $("tank").offsetTop - speed + "px"
+        break;
+        case 39 :
+        direction = 39;
+        $("tank").style.background = "url(tankAll.gif) -96px 0 no-repeat"
+        if(WallTD){
+          $("tank").style.left = $("tank").offsetLeft + "px"
+        }else{
+          $("tank").style.left = $("tank").offsetLeft + speed + "px"
+        }
+        break;
+        case 40 :
+        direction = 40;
+        $("tank").style.background = "url(tankAll.gif) -32px 0 no-repeat"
+        //坦克不能
+        if(WallTD){
+          $("tank").style.top = $("tank").offsetTop + "px"
+        }else{
+          $("tank").style.top = $("tank").offsetTop + speed + "px"
+        }
+        break;
+      }
+      //坦克不能走出边框
+      if($("tank").offsetLeft <= 0){
+        $("tank").style.left = 0;
+      }else if($("tank").offsetTop <= 0){
+        $("tank").style.top = 0;
+      }else if($("box").clientWidth - $("tank").offsetLeft <= $("tank").offsetWidth){
+        $("tank").style.left = $("box").clientWidth - $("tank").clientWidth + "px"
+      }else if($("box").clientHeight - $("tank").offsetTop <= $("tank").offsetHeight){
+        $("tank").style.top = $("box").clientHeight - $("tank").clientHeight + "px"
+      }
+      // Wall();
+    }
+    //封装一颗子弹
+    function bullet1(direction){
+      var div = document.createElement("div");
+      div.className = "bullet";
+      $("box").appendChild(div);
+      //确定子弹位置参数
+      var x = $("tank").offsetLeft + $("tank").offsetWidth;
+      var y = $("tank").offsetTop + $("tank").offsetHeight;
+      //将子弹定位到炮口
+      if(direction == 37){
+        div.style.left = x - 54 + "px";
+        div.style.top = y - 20 + "px";
+      }else if(direction == 38){
+        div.style.left = x - 20 + "px";
+        div.style.top = y -56 + "px";
+      }else if(direction == 39){
+        div.style.left = x + "px";
+        div.style.top = y - 22 + "px";
+      }else if(direction == 40){
+        div.style.left = x - 20 + "px";
+        div.style.top = y + "px";
+      }
+      //子弹发射的方向以及发射运动
+      var timer = setInterval(function(){
+        var speed = 2;
+        if(direction == 37){
+          div.style.left = div.offsetLeft - speed + "px";
+        }else if(direction == 38){
+          div.style.top = div.offsetTop - speed + "px";
+        }else if(direction == 39){
+          div.style.left = div.offsetLeft + speed + "px";
+        }else if(direction == 40){
+          div.style.top = div.offsetTop + speed + "px";
+        }
+        //子弹发射后的射击范围
+        if(div.offsetTop < 0||div.offsetLeft<0||div.offsetLeft>=$("box").clientWidth||div.offsetTop>=$("box").clientHeight){
+            div.remove();
+            clearInterval(timer)
+        }
+        //普通坦克一发子弹解决
+       if(collision(div,otherTank) == true){
+        div.remove();
+        otherTank.style.display =  "none"
+        clearInterval(timer) 
+       } 
+       //带刺坦克三发子弹
+       if(collision(div,otherTank1) == true){
+        div.remove();
+        num++;
+        if(num == 3){
+          num = 0;
+          otherTank1.style.display =  "none"
+        }
+        clearInterval(timer) 
+       } 
+       //超级坦克六发子弹
+       if(collision(div,otherTank2) == true){
+         
+        div.remove();
+        numm++;
+        if(numm == 5){
+          numm = 0;
+          otherTank2.style.display =  "none"
+        }
+        clearInterval(timer) 
+       }
+       //子弹不能穿墙
+       if(collision(div,$("town")) == true){
+          div.remove();
+       }
+      },5)  
+    }
+
+    //碰撞事件
+    function collision(obj1,obj2){
+      var L = (obj1.offsetLeft + obj1.offsetWidth) >= obj2.offsetLeft
+      var R = obj1.offsetLeft <= (obj2.offsetLeft + obj2.offsetWidth)
+      var T = (obj1.offsetHeight + obj1.offsetTop) >= obj2.offsetTop
+      var D = obj1.offsetTop <= (obj2.offsetTop + obj2.offsetHeight)
+      if(L && R && T && D){
+        return true,L,T;
+      }else{
+        return false;
+      }
+    }
+
+    //随机敌方坦克位置
+      var otherTank = document.createElement("div")
+      otherTank.className = "tank1"
+      $("box").appendChild(otherTank)
+      otherTank.style.left = randomNum(5,560) + "px"
+      otherTank.style.top = randomNum(5,300) + "px"
+      //带刺坦克
+      var otherTank1 = document.createElement("div")
+      otherTank1.className = "tank2"
+      $("box").appendChild(otherTank1)
+      otherTank1.style.left = randomNum(5,560) + "px"
+      otherTank1.style.top = randomNum(5,300) + "px"
+      //超级坦克
+      var otherTank2 = document.createElement("div")
+      otherTank2.className = "tank3"
+      $("box").appendChild(otherTank2)
+      otherTank2.style.left = randomNum(5,200) + "px"
+      otherTank2.style.top = randomNum(5,300) + "px"
+      //去重
+
+      //敌方坦克行走
+      var enemyTimer = setInterval(function(){
+        if(otherTank.offsetLeft >= ($("box").offsetWidth - otherTank.offsetWidth)){
+          sp*=-1;
+          otherTank.style.background = "url(tankAll.gif) -192px 0 no-repeat"
+        }else if(otherTank.offsetLeft <= 0){
+          sp*=-1;
+          otherTank.style.background = "url(tankAll.gif) -224px 0 no-repeat"
+        }
+        otherTank.style.left = otherTank.offsetLeft + sp + "px"
+        //带刺坦克行走
+        if(otherTank1.offsetLeft >= ($("box").offsetWidth - otherTank1.offsetWidth)){
+          spe*=-1;
+          otherTank1.style.background = "url(tankAll.gif) -192px -32px no-repeat"
+        }else if(otherTank1.offsetLeft <= 0){
+          spe*=-1;
+          otherTank1.style.background = "url(tankAll.gif) -224px -32px no-repeat"
+        }
+        otherTank1.style.left = otherTank1.offsetLeft + spe + "px"
+        //超级坦克行走
+        if(otherTank2.offsetTop >= ($("box").clientHeight - otherTank2.offsetHeight)){
+          spee*=-1;
+          otherTank2.style.background = "url(tankAll.gif) -256px -64px no-repeat"
+        }else if(otherTank2.offsetTop <= 0){
+          spee*=-1;
+          otherTank2.style.background = "url(tankAll.gif) -288px -64px no-repeat"
+        }
+        otherTank2.style.top = otherTank2.offsetTop + spee + "px"
+
+        //敌方坦克撞上坦克，坦克身亡
+        if(collision($("tank"),otherTank) == true || collision($("tank"),otherTank1) == true || collision($("tank"),otherTank2) == true){
+          $("tank").style.display =  "none"
+        }
+        //吃炸弹敌方坦克全部死亡
+        if(collision($("tank"),zhadan)){
+          otherTank.style.display = "none"
+          otherTank1.style.display = "none"
+          otherTank2.style.display = "none"
+          zhadan.style.background = "none"
+          clearInterval(enemyTimer)
+        }
+      },100)
+      //炸弹
+      var zhadan = document.createElement("div")
+      zhadan.className = "zhadan"
+      $("box").appendChild(zhadan)
+      zhadan.style.left = randomNum(5,560) + "px"
+      zhadan.style.top = randomNum(5,300) + "px"
+      //城墙部分
+
+  </script>
+</body>
+</html>
